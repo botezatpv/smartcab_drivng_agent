@@ -11,48 +11,54 @@ class LearningAgent(Agent):
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
         # TODO: Initialize any additional variables here
-        self.alpha = 0.2
-        self.gamma = 0.9
-        self.actions = [None, 'right', 'forward', 'left']
+        self.alpha = .2
+        self.gamma = .9
+        self.actions = env.valid_actions
         self.Q = {}
         self.counter = 0
-        self.action = None
+        
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
-
+     
     def update(self, t):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
 
-        # Checking Qtable 
+        #print max(self.Q[self.state, next_action] for next_action in self.actions)
+        # TODO: Update state
+        #self.state = (self.next_waypoint)
+        self.state = (self.next_waypoint, inputs['light'], inputs['oncoming'], inputs['left'], inputs['right'])
+        #self.state =(inputs['light'])
+        self.max_value = float('-inf')
         for next_action in self.actions:
             if (self.state, next_action) not in self.Q:
-                self.Q[self.state, next_action] = 0.0
-        
-        if (self.state, self.action) not in self.Q:
-            self.Q[(self.state, action)] = 0.0        
-        
-        # TODO: Update state
-        self.state = (self.next_waypoint, inputs['light'])
-        
-        # TODO: Select action according to your policy
-        self.action = random.choice(['left', 'right'])
+                self.Q[self.state, next_action] = 1.0
+                self.action = random.choice(self.actions)
+                #print 'this act was random'
+            
+            if self.Q[self.state, next_action] > self.max_value:
+                self.max_value = self.Q[self.state, next_action]
+                self.action = next_action
+                #print self.max_value
 
+
+        # Checking Qtable 
+        #action = 'forward'
+        if (self.state, self.action) not in self.Q:
+            self.Q[(self.state, self.action)] = 0.0        
+  
         # Execute action and get reward
         reward = self.env.act(self, self.action);
         
         # TODO: Learn policy based on state, action, reward            
         self.Q[(self.state, self.action)] = ((1.0 - self.alpha) * self.Q[(self.state, self.action)] +
-		self.alpha * (reward + self.gamma * 
-		max(self.Q[self.state, next_action] for next_action in self.actions)))
-        print self.action		
-        
+		self.alpha * (reward + self.gamma * self.max_value))
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
-
+    
 
 def run():
     """Run the agent for a finite number of trials."""
@@ -64,12 +70,11 @@ def run():
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it
-    sim = Simulator(e, update_delay=1, display=True)  # create simulator (uses pygame when display=True, if available)
+    sim = Simulator(e, update_delay=0.5, display=True)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
     sim.run(n_trials=100)  # run for a specified number of trials
     # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
-
 
 if __name__ == '__main__':
     run()
