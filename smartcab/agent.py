@@ -16,9 +16,7 @@ class LearningAgent(Agent):
         self.actions = [None, 'right', 'forward', 'left']
         self.Q = {}
         self.counter = 0
-
-        #self.next_action = None
-		
+        self.action = None
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -30,27 +28,29 @@ class LearningAgent(Agent):
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
 
-        # TODO: Update state
-        self.state = (self.next_waypoint, inputs['light'])
-        
-        # TODO: Select action according to your policy
-        # Execute action and get reward
-        action = random.choice(['forward', 'left', 'right'])
-        reward = self.env.act(self, action);
-        # TODO: Learn policy based on state, action, reward
+        # Checking Qtable 
         for next_action in self.actions:
             if (self.state, next_action) not in self.Q:
                 self.Q[self.state, next_action] = 0.0
         
-        if (self.state, action) not in self.Q:
-            self.Q[(self.state, action)] = 0.0
-            
-        self.Q[(self.state, action)] = ((1.0 - self.alpha) * self.Q[(self.state, action)] +
+        if (self.state, self.action) not in self.Q:
+            self.Q[(self.state, action)] = 0.0        
+        
+        # TODO: Update state
+        self.state = (self.next_waypoint, inputs['light'])
+        
+        # TODO: Select action according to your policy
+        self.action = random.choice(['left', 'right'])
+
+        # Execute action and get reward
+        reward = self.env.act(self, self.action);
+        
+        # TODO: Learn policy based on state, action, reward            
+        self.Q[(self.state, self.action)] = ((1.0 - self.alpha) * self.Q[(self.state, self.action)] +
 		self.alpha * (reward + self.gamma * 
 		max(self.Q[self.state, next_action] for next_action in self.actions)))
-				
-        #self.env.act(self, action) 
-        #print max(self.Q.has_key(self.Q[self.state, next_action]))
+        print self.action		
+        
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
 
