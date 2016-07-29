@@ -16,6 +16,7 @@ class LearningAgent(Agent):
         self.actions = [None, 'right', 'forward', 'left']
         self.Q = {}
         self.counter = 0
+
         #self.next_action = None
 		
 
@@ -31,26 +32,25 @@ class LearningAgent(Agent):
 
         # TODO: Update state
         self.state = (self.next_waypoint, inputs['light'])
-        reward = 3
-		
+        
         # TODO: Select action according to your policy
         # Execute action and get reward
-        action = max(self.Q[(self.state, action)])
-
+        action = random.choice(['forward', 'left', 'right'])
+        reward = self.env.act(self, action);
         # TODO: Learn policy based on state, action, reward
-        #self.Q[(self.state, action)] = 1
         for next_action in self.actions:
-		    if (self.state, next_action) not in self.Q:
-			    self.Q[self.state, next_action] = 0.0
-		    elif (self.state, action) not in self.Q:
-			    self.Q[(self.state, action)] = 0.0
-		    else: 
-		        self.Q[(self.state, action)] = ((1.0 - self.alpha) * self.Q[(self.state, action)] + 
-				self.alpha * (reward + self.gamma * 
-				self.Q[self.state, next_action]))
+            if (self.state, next_action) not in self.Q:
+                self.Q[self.state, next_action] = 0.0
+        
+        if (self.state, action) not in self.Q:
+            self.Q[(self.state, action)] = 0.0
+            
+        self.Q[(self.state, action)] = ((1.0 - self.alpha) * self.Q[(self.state, action)] +
+		self.alpha * (reward + self.gamma * 
+		max(self.Q[self.state, next_action] for next_action in self.actions)))
 				
-        self.env.act(self, action) 
-        print self.Q
+        #self.env.act(self, action) 
+        #print max(self.Q.has_key(self.Q[self.state, next_action]))
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
 
