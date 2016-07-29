@@ -10,10 +10,11 @@ class LearningAgent(Agent):
         super(LearningAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
-        self.alpha = 0.2
+        self.alpha = 0.45
         self.gamma = 0.9
         self.valid_actions = env.valid_actions
         self.Q = {}
+        self.i = 0
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -31,7 +32,7 @@ class LearningAgent(Agent):
         self.max_value = float('-inf')
         for next_action in self.valid_actions:
             if (self.state, next_action) not in self.Q:
-                self.Q[self.state, next_action] = 0.5
+                self.Q[self.state, next_action] = 0.1
             
             if self.Q[self.state, next_action] > self.max_value:
                 self.max_value = self.Q[self.state, next_action]
@@ -50,7 +51,10 @@ class LearningAgent(Agent):
 		self.alpha * (reward + self.gamma * self.max_value))
         
         # LOG
-        print "LearningAgent.update(): deadline = {}, inputs = {}, self.action = {}, reward = {}".format(deadline, inputs, self.action, reward)  # [debug]
+        if reward < 0:
+            self.i = self.i + 1
+            print self.i
+            print "LearningAgent.update(): deadline = {}, inputs = {}, self.action = {}, reward = {}".format(deadline, inputs, self.action, reward)  # [debug]
 
 
 def run():
@@ -63,7 +67,7 @@ def run():
     # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
 
     # Now simulate it
-    sim = Simulator(e, update_delay=1, display=True)  # create simulator (uses pygame when display=True, if available)
+    sim = Simulator(e, update_delay=0.6, display=True)  # create simulator (uses pygame when display=True, if available)
     # NOTE: To speed up simulation, reduce update_delay and/or set display=False
 
     sim.run(n_trials=100)  # run for a specified number of trials
