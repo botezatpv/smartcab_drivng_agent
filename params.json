@@ -1,0 +1,6 @@
+{
+  "name": "Smartcab drivng agent",
+  "tagline": "smartcab drivng agent",
+  "body": "### Introduction\r\n\r\nSmartcab driving agent is program that use Q-Learning algorithm to teach a car how to find optimal way from point A to point B. \r\n\r\n\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
